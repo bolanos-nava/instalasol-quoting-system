@@ -7,50 +7,65 @@
  * See: quoting_system.md for more information
  */
 
+function convertStringToNumberAndValidate(string) {
+  let number = Number(string);
+  if (isNaN(number)) {
+    alert("Introduce solo valores numéricos");
+    number = undefined;
+  } else if (!number) {
+    alert("Introdujiste texto vacío");
+    number = undefined;
+  }
+  return number;
+}
+
 function convertPromptToNumberAndValidate(promptMessage) {
   let userPrompt = prompt(promptMessage);
   if (userPrompt === null) return null;
 
-  userPrompt = Number(userPrompt);
-  if (isNaN(userPrompt)) {
-    alert("Introduce solo valores numéricos");
-    userPrompt = undefined;
-  } else if (!userPrompt) {
-    alert("Introdujiste texto vacío");
-    userPrompt = undefined;
-  }
-  return userPrompt;
+  return convertStringToNumberAndValidate(userPrompt);
 }
 
-/**
- * Function to prompt the user for their bill data. Returns undefined if the inputted value is an empty string of NaN
- * @param {number} billNumber Parameter that indicates the number of bill the user is currently inputting
- * @returns number | undefined
- */
-function promptUserForBillData(billNumber = 1) {
-  let billCost;
-  do {
-    billCost = convertPromptToNumberAndValidate(
-      `Introduce lo que pagaste en tu recibo ${billNumber} para calcular el costo de tu instalación:`
+function promptUserToGetAverageMonthlyCost() {
+  let billsAverage;
+
+  while (billsAverage === undefined) {
+    const userPrompt = prompt(
+      "Introduce lo que pagaste en tus últimos recibos para obtener un promedio mensual, separando cada cantidad de la anterior con espacios.\n" +
+        "Puedes introducir hasta 6 recibos:"
     );
-  } while (typeof billCost === "undefined");
 
-  // let billConsumption;
-  // do {
-  //   billConsumption = convertPromptToNumberAndValidate(
-  //     `Introduce el consumo del recibo ${billNumber}:`
-  //   );
-  // } while (typeof billConsumption === "undefined");
+    if (userPrompt === "") {
+      alert("Introdujiste texto vacío.");
+      continue;
+    }
 
-  return billCost;
-}
+    // if user clicks "Cancel" on the prompt, userPrompt will be null
+    if (userPrompt === null) {
+      billsAverage = null;
+      break;
+    }
 
-function getAveragePerMonth(items = [], monthsNumber) {
-  const sum = items.reduce(
-    (accumulator, currentValue) => accumulator + currentValue,
-    0
-  );
-  return sum / monthsNumber;
+    const bills = userPrompt.trim().split(/\s+/); // we clean the string of leading and trailing whitespaces and then we split it by its whitespaces
+    if (bills.length > 6) {
+      alert("Introdujiste más de 6 recibos");
+      continue;
+    }
+    let billsSum = 0;
+    for (const bill of bills) {
+      const number = Number(bill);
+      if (isNaN(number)) {
+        billsSum = null;
+        alert("Introdujiste caracteres no numéricos.");
+        break;
+      }
+      billsSum += number;
+    }
+
+    if (Boolean(billsSum)) billsAverage = billsSum / (2 * bills.length); // we multiply by 2 because each electricity bill covers 2 months
+  }
+
+  return billsAverage;
 }
 
 function getTotalSystemCalculation(costAverageBimonthly) {
@@ -76,9 +91,32 @@ function getTotalSystemCalculation(costAverageBimonthly) {
   };
 }
 
-function calculateMonthlyPayments(option, priceBase, monthsNumber) {
-  const getPriceFinal = (interestRate) => priceBase * (1 + interestRate);
+function getPaymentOptionName(paymentOptionId) {
+  // This format simulates what we would get from a database
+  const paymentOptions = [
+    {
+      id: 1,
+      name: "oneExhibition",
+    },
+    {
+      id: 2,
+      name: "creditCard",
+    },
+    {
+      id: 3,
+      name: "bankCredit",
+    },
+  ];
 
+  const paymentOptionSelected = paymentOptions.find(
+    ({ id }) => id === paymentOptionId
+  );
+  return typeof paymentOptionSelected === "object"
+    ? paymentOptionSelected.name
+    : null;
+}
+
+function calculateMonthlyPayments(paymentOptionId, priceBase, monthsNumber) {
   const paymentOptionsInterestRates = {
     creditCard: {
       ratesPerMonth: [
@@ -114,27 +152,24 @@ function calculateMonthlyPayments(option, priceBase, monthsNumber) {
     },
   };
 
-  const selectedRate = paymentOptionsInterestRates[option].ratesPerMonth.find(
-    ({ condition }) => condition === true
-  );
+  const optionName = getPaymentOptionName(paymentOptionId);
+
+  const selectedRate = paymentOptionsInterestRates[
+    optionName
+  ].ratesPerMonth.find(({ condition }) => condition === true);
   return typeof selectedRate === "object"
-    ? getPriceFinal(selectedRate.rate) / monthsNumber
-    : undefined;
+    ? (priceBase * (1 + selectedRate.rate)) / monthsNumber
+    : null;
 }
 
 function main() {
   alert(
     "Bienvenido a InstalaSol, empresa dedicada a la instalación de sistemas fotovoltaicos.\n" +
-      "A continuación, podrás introducir el costo de tus tres últimos recibos de electricidad para estimar el costo de la instalación en tu residencia."
+      "A continuación, podrás introducir el costo de tus recibos del último año para estimar el costo de tu instalación para cubrir 100% de tu consumo."
   );
-  let costsSum = 0;
-  for (let i = 1; i <= 3; i++) {
-    const cost = promptUserForBillData(i);
-    if (cost === null) break;
-    costsSum += cost;
-  }
-  if (!costsSum) return;
-  const costAverageBimonthly = costsSum / 6;
+
+  const costAverageBimonthly = promptUserToGetAverageMonthlyCost();
+  if (!costAverageBimonthly) return;
 
   const totalSystemCalculation =
     getTotalSystemCalculation(costAverageBimonthly);
@@ -144,10 +179,10 @@ function main() {
   );
 
   alert(
-    "Contamos con 3 formas de pago: \n" +
-      "1. Pago de contado, con el 10% de descuento \n" +
-      "2. Tarjeta de crédito, pagando en hasta 6 plazos mensuales \n" +
-      "3. Crédito bancario, pagando hasta en 48 meses"
+    "Contamos con 3 formas de pago:\n" +
+      "1. Pago de contado, con el 10% de descuento\n" +
+      "2. Tarjeta de crédito, pagando en hasta 6 plazos mensuales\n" +
+      "3. Crédito bancario, pagando en hasta 48 meses\n"
   );
   const paymentOption = convertPromptToNumberAndValidate(
     "Introduce el número de opción que deseas:"
@@ -166,22 +201,19 @@ function main() {
   let priceMonthly = 0;
   let monthsNumber = 0;
   do {
-    monthsNumber =
-      paymentOption === 2 || paymentOption === 3
-        ? convertPromptToNumberAndValidate(
-            "Introduce el número de mensualidades que deseas:"
-          )
-        : undefined;
+    monthsNumber = convertPromptToNumberAndValidate(
+      "Introduce el número de mensualidades en las que deseas pagar:"
+    );
     priceMonthly = calculateMonthlyPayments(
       paymentOption,
       totalSystemCalculation.panelsCost,
       monthsNumber
     );
-    if (typeof priceMonthly === "undefined")
+    if (typeof priceMonthly !== "number")
       alert(
         "Introdujiste número de meses inválido para la opción seleccionada."
       );
-  } while (typeof priceMonthly === "undefined");
+  } while (typeof priceMonthly !== "number");
 
   alert(
     `Tu cotización es de ${monthsNumber} pagos mensuales de \$${priceMonthly} cada uno`
