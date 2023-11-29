@@ -9,6 +9,8 @@
 
 function convertPromptToNumberAndValidate(promptMessage) {
   let userPrompt = prompt(promptMessage);
+  if (userPrompt === null) return null;
+
   userPrompt = Number(userPrompt);
   if (isNaN(userPrompt)) {
     alert("Introduce solo valores numéricos");
@@ -44,16 +46,14 @@ function promptUserForBillData(billNumber = 1) {
 }
 
 function getAveragePerMonth(items = [], monthsNumber) {
-  let sum = 0;
-  for (const item of items) {
-    sum += item;
-  }
+  const sum = items.reduce(
+    (accumulator, currentValue) => accumulator + currentValue,
+    0
+  );
   return sum / monthsNumber;
 }
 
 function getTotalSystemCalculation(costAverageBimonthly) {
-  // TODO: implement code to calculate number of panels
-
   const COST_PER_KW = 3; // cost per kiloWatt
   const PRODUCED_ENERGY_PER_KWP = 4; // produced energy per kiloWatt-peak
   const PANEL_POWER = 555; // power in kiloWatts per solar panel
@@ -77,59 +77,63 @@ function getTotalSystemCalculation(costAverageBimonthly) {
 }
 
 function calculateMonthlyPayments(option, priceBase, monthsNumber) {
-  const ONE_EXHIBITION = 1;
-  const CREDIT_CARD = 2;
-  const BANK_CREDIT = 3;
-
   const getPriceFinal = (interestRate) => priceBase * (1 + interestRate);
 
-  let priceMonthly = 0;
-  switch (option) {
-    case ONE_EXHIBITION:
-      priceMonthly = priceBase * 0.9;
-      break;
-    case CREDIT_CARD: {
-      const INTEREST_RATES = [0.05, 0.1];
-      switch (monthsNumber) {
-        case 3:
-          priceMonthly = getPriceFinal(INTEREST_RATES[0]) / monthsNumber;
-          break;
-        case 6:
-          priceMonthly = getPriceFinal(INTEREST_RATES[1]) / monthsNumber;
-          break;
-      }
-      break;
-    }
-    case BANK_CREDIT:
-      {
-        const INTEREST_RATES = [0.1, 0.2, 0.35, 0.45];
-        switch (monthsNumber) {
-          case 12:
-            priceMonthly = getPriceFinal(INTEREST_RATES[0]) / monthsNumber;
-            break;
-          case 24:
-            priceMonthly = getPriceFinal(INTEREST_RATES[1]) / monthsNumber;
-            break;
-          case 36:
-            priceMonthly = getPriceFinal(INTEREST_RATES[2]) / monthsNumber;
-            break;
-          case 48:
-            priceMonthly = getPriceFinal(INTEREST_RATES[3]) / monthsNumber;
-            break;
-        }
-      }
-      break;
-  }
-  return priceMonthly;
+  const paymentOptionsInterestRates = {
+    creditCard: {
+      ratesPerMonth: [
+        {
+          condition: monthsNumber <= 3,
+          rate: 0.05,
+        },
+        {
+          condition: monthsNumber <= 6,
+          rate: 0.1,
+        },
+      ],
+    },
+    bankCredit: {
+      ratesPerMonth: [
+        {
+          condition: monthsNumber <= 12,
+          rate: 0.1,
+        },
+        {
+          condition: monthsNumber <= 24,
+          rate: 0.2,
+        },
+        {
+          condition: monthsNumber <= 36,
+          rate: 0.35,
+        },
+        {
+          condition: monthsNumber <= 48,
+          rate: 0.45,
+        },
+      ],
+    },
+  };
+
+  const selectedRate = paymentOptionsInterestRates[option].ratesPerMonth.find(
+    ({ condition }) => condition === true
+  );
+  return typeof selectedRate === "object"
+    ? getPriceFinal(selectedRate.rate) / monthsNumber
+    : undefined;
 }
 
 function main() {
+  alert(
+    "Bienvenido a InstalaSol, empresa dedicada a la instalación de sistemas fotovoltaicos.\n" +
+      "A continuación, podrás introducir el costo de tus tres últimos recibos de electricidad para estimar el costo de la instalación en tu residencia."
+  );
   let costsSum = 0;
   for (let i = 1; i <= 3; i++) {
     const cost = promptUserForBillData(i);
+    if (cost === null) break;
     costsSum += cost;
-    console.log({ i, cost, costsSum });
   }
+  if (!costsSum) return;
   const costAverageBimonthly = costsSum / 6;
 
   const totalSystemCalculation =
@@ -148,18 +152,36 @@ function main() {
   const paymentOption = convertPromptToNumberAndValidate(
     "Introduce el número de opción que deseas:"
   );
-  const monthsNumber =
-    paymentOption === 2 || paymentOption === 3
-      ? convertPromptToNumberAndValidate(
-          "Introduce el número de mensualidades que deseas:"
-        )
-      : undefined;
+  if (paymentOption === null) return;
 
-  const priceMonthly = calculateMonthlyPayments(
-    paymentOption,
-    totalSystemCalculation.panelsCost,
-    monthsNumber
-  );
+  if (paymentOption === 1) {
+    alert(
+      `Tu cotización es de \$${
+        totalSystemCalculation.panelsCost * 0.9
+      } después del 10% de descuento`
+    );
+    return;
+  }
+
+  let priceMonthly = 0;
+  let monthsNumber = 0;
+  do {
+    monthsNumber =
+      paymentOption === 2 || paymentOption === 3
+        ? convertPromptToNumberAndValidate(
+            "Introduce el número de mensualidades que deseas:"
+          )
+        : undefined;
+    priceMonthly = calculateMonthlyPayments(
+      paymentOption,
+      totalSystemCalculation.panelsCost,
+      monthsNumber
+    );
+    if (typeof priceMonthly === "undefined")
+      alert(
+        "Introdujiste número de meses inválido para la opción seleccionada."
+      );
+  } while (typeof priceMonthly === "undefined");
 
   alert(
     `Tu cotización es de ${monthsNumber} pagos mensuales de \$${priceMonthly} cada uno`
