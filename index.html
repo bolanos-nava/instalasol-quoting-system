@@ -1,10 +1,159 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="src/js/index.js"></script>
-    <title>Document</title>
+
+    <!-- Bootstrap -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+
+    <!-- Own links -->
+    <link rel="stylesheet" href="src/css/styles.css" />
+
+    <!-- Own script with defer attribute -->
+    <!-- <script defer src="src/js/index.js"></script> -->
+
+    <!-- Meta tags -->
+    <meta
+      name="description"
+      content="Contáctate con InstalaSol para generarte una cotización personalizada - de acuerdo con tu consumo y presupuesto"
+    />
+    <meta
+      name="keywords"
+      content="contacto, contáctanos, paneles, paneles solares, fotovoltaico, galería, solares"
+    />
+    <meta name="author" content="InstalaSol" />
+
+    <!-- Page title -->
+    <title>InstalaSol | Cotizaciones</title>
   </head>
-  <body></body>
+  <body>
+    <header class="header" id="header">
+      <a class="header__logo-container" href="../index.html">
+        <img
+          class="header__logo"
+          src="../src/assets/images/instalasol-logo.png"
+          alt="InstalaSol logo"
+        />
+      </a>
+
+      <div class="header__titles">
+        <h1 class="header__title header__title--main">InstalaSol</h1>
+        <h3 class="header__title header__title--secondary">
+          Ayudándote a ahorrar dinero en tu recibo
+        </h3>
+      </div>
+    </header>
+
+    <div class="body-container">
+      <main class="main main--contact container">
+        <h2 class="main__title main--contact__title">Cotizador</h2>
+        <form class="main--contact-form">
+          <div class="_input-group">
+            <label class="_input-group__label" for="receipt1"
+              >Costo de recibo 1</label
+            >
+            <input type="text" class="form-control" id="receipt1" />
+          </div>
+          <div class="_input-group">
+            <label class="_input-group__label" for="receipt2"
+              >Costo de recibo 2</label
+            >
+            <input type="text" class="form-control" id="receipt2" />
+          </div>
+          <div class="_input-group">
+            <label class="_input-group__label" for="receipt3"
+              >Costo de recibo 3</label
+            >
+            <input type="text" class="form-control" id="receipt3" />
+          </div>
+          <div class="_input-group">
+            <label class="_input-group__label" for="receipt4"
+              >Costo de recibo 4</label
+            >
+            <input type="text" class="form-control" id="receipt4" />
+          </div>
+          <div class="_input-group">
+            <label class="_input-group__label" for="receipt5"
+              >Costo de recibo 5</label
+            >
+            <input type="text" class="form-control" id="receipt5" />
+          </div>
+          <div class="_input-group">
+            <label class="_input-group__label" for="receipt6"
+              >Costo de recibo 6</label
+            >
+            <input type="text" class="form-control" id="receipt6" />
+          </div>
+
+          <div class="_input-group">
+            <label for="sizesSelect" class="_input-group__label"
+              >Forma de pago</label
+            >
+            <select
+              class="form-select"
+              aria-label="Selector de número de paneles solares"
+              title="Selecciona tamaño de instalacion"
+              name="size"
+              id="size-select"
+            >
+              <option selected>Forma de pago</option>
+              <option value="1">Una exhibición</option>
+              <option value="2">Tarjeta de crédito</option>
+              <option value="3">Crédito bancario</option>
+            </select>
+          </div>
+
+          <div class="main--contact-form__buttons">
+            <input
+              class="main--contact-form__button btn button button--rounded"
+              type="reset"
+              value="Limpiar"
+              role="button"
+            />
+            <input
+              class="main--contact-form__button btn button button--rounded"
+              type="submit"
+              value="Calcular"
+              role="button"
+              id="submitButton"
+            />
+          </div>
+        </form>
+      </main>
+    </div>
+
+    <footer class="footer">
+      <a href="#header" class="go-to-top-button">
+        <i class="fa-solid fa-arrow-up"></i>
+      </a>
+      <ul class="footer__links">
+        <li class="footer__link-container">
+          <a class="footer__link btn button button--rounded" href="#"
+            >Copyright</a
+          >
+        </li>
+        <li class="footer__link-container">
+          <a class="footer__link btn button button--rounded" href="#"
+            >Aviso de privacidad</a
+          >
+        </li>
+      </ul>
+    </footer>
+
+    <!-- ##################################### -->
+    <!-- BOOTSTRAP -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+      crossorigin="anonymous"
+    ></script>
+    <!-- BOOTSTRAP -->
+    <!-- ##################################### -->
+  </body>
 </html>
