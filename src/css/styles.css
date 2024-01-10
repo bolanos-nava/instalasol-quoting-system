@@ -884,4 +884,8 @@ textarea.form-control {
   list-style-position: inside;
 }
 
+.input--invalid {
+  border: 1px solid #fb0b0b !important;
+}
+
 /*# sourceMappingURL=styles.css.map */

@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="src/css/styles.css" />
 
     <!-- Own script with defer attribute -->
-    <!-- <script defer src="src/js/index.js"></script> -->
+    <script type="module" src="src/js/index.js"></script>
 
     <!-- Meta tags -->
     <meta
@@ -54,53 +54,40 @@
       <main class="main main--contact container">
         <h2 class="main__title main--contact__title">Cotizador</h2>
         <form class="main--contact-form">
-          <div class="_input-group">
-            <label class="_input-group__label" for="receipt1"
-              >Costo de recibo 1</label
+          <div class="d-flex flex-column w-100" id="inputGroupContainer">
+            <div class="_input-group">
+              <label
+                class="_input-group__label receipt-input-groups"
+                for="receipt1"
+                >Costo de recibo 1</label
+              >
+              <input type="number" class="form-control" id="receipt1" />
+            </div>
+            <p
+              class="text-secondary align-self-end text-danger visually-hidden"
+              id="invalidInputAlert"
             >
-            <input type="text" class="form-control" id="receipt1" />
+              Inválido
+            </p>
           </div>
-          <div class="_input-group">
-            <label class="_input-group__label" for="receipt2"
-              >Costo de recibo 2</label
-            >
-            <input type="text" class="form-control" id="receipt2" />
-          </div>
-          <div class="_input-group">
-            <label class="_input-group__label" for="receipt3"
-              >Costo de recibo 3</label
-            >
-            <input type="text" class="form-control" id="receipt3" />
-          </div>
-          <div class="_input-group">
-            <label class="_input-group__label" for="receipt4"
-              >Costo de recibo 4</label
-            >
-            <input type="text" class="form-control" id="receipt4" />
-          </div>
-          <div class="_input-group">
-            <label class="_input-group__label" for="receipt5"
-              >Costo de recibo 5</label
-            >
-            <input type="text" class="form-control" id="receipt5" />
-          </div>
-          <div class="_input-group">
-            <label class="_input-group__label" for="receipt6"
-              >Costo de recibo 6</label
-            >
-            <input type="text" class="form-control" id="receipt6" />
-          </div>
+          <button
+            type="button"
+            id="addReceipt"
+            class="btn btn-sm button align-self-end"
+          >
+            Añadir recibo
+          </button>
 
-          <div class="_input-group">
-            <label for="sizesSelect" class="_input-group__label"
+          <div class="_input-group" id="paymentFormSelect">
+            <label for="paymentOptionSelect" class="_input-group__label"
               >Forma de pago</label
             >
             <select
               class="form-select"
-              aria-label="Selector de número de paneles solares"
-              title="Selecciona tamaño de instalacion"
-              name="size"
-              id="size-select"
+              aria-label="Selector de formas de pago"
+              title="Selecciona forma de pago"
+              name="paymentOption"
+              id="paymentOptionSelect"
             >
               <option selected>Forma de pago</option>
               <option value="1">Una exhibición</option>
@@ -109,7 +96,16 @@
             </select>
           </div>
 
-          <div class="main--contact-form__buttons">
+          <div class="_input-group" id="paymentFormSelect">
+            <label for="monthsSelect" class="_input-group__label"
+              >Mensualidades</label
+            >
+            <select class="form-select" name="months" id="monthsSelect">
+              <option selected>Mensualidades</option>
+            </select>
+          </div>
+
+          <div class="flex-wrap main--contact-form__buttons">
             <input
               class="main--contact-form__button btn button button--rounded"
               type="reset"
@@ -118,10 +114,17 @@
             />
             <input
               class="main--contact-form__button btn button button--rounded"
-              type="submit"
-              value="Calcular"
+              type="button"
+              value="Calcular costo total"
               role="button"
-              id="submitButton"
+              id="buttonCalculateTotalCost"
+            />
+            <input
+              class="main--contact-form__button btn button button--rounded"
+              type="button"
+              value="Calcular pagos mensuales"
+              role="button"
+              id="buttonCalculateMonthlyPayments"
             />
           </div>
         </form>
