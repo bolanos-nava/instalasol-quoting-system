@@ -1,0 +1,50 @@
+{
+  "panelSystemConstants": {
+    "COST_PER_KW": 3,
+    "PRODUCED_ENERGY_PER_KWP": 4,
+    "POWER_PER_PANEL": 555,
+    "PANEL_COST": 18000
+  },
+
+  "paymentOptions": [
+    {
+      "id": 1,
+      "name": "Una exhibición",
+      "codename": "oneExhibition"
+    },
+    {
+      "id": 2,
+      "name": "Tarjeta de crédito",
+      "codename": "creditCard",
+      "interestRates": [
+        {
+          "months": 3,
+          "rate": 0.05
+        },
+        {
+          "months": 6,
+          "rate": 0.1
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Crédito bancario",
+      "codename": "bankCredit",
+      "interestRates": [
+        {
+          "months": 12,
+          "rate": 0.1
+        },
+        {
+          "months": 24,
+          "rate": 0.2
+        },
+        {
+          "months": 36,
+          "rate": 0.35
+        }
+      ]
+    }
+  ]
+}
