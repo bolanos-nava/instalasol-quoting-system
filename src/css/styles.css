@@ -814,14 +814,21 @@ textarea.form-control {
   flex: 0 1 800px;
   margin: 0 auto;
 }
-.main--contact-form {
+.main--contact-form,
+.main--contact-form__input-list {
   display: flex;
   flex-flow: column;
-  align-items: center;
   gap: 5px;
 }
+.main--contact-form {
+  align-items: center;
+}
+.main--contact-form__input-list {
+  width: 100%;
+}
 @media (min-width: 576px) {
-  .main--contact-form {
+  .main--contact-form,
+  .main--contact-form__input-list {
     gap: 10px;
   }
 }

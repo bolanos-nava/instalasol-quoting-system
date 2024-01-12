@@ -1,6 +1,7 @@
+import { ElectricBill } from "./ElectricBill.js";
+
 export class PanelSystem {
   electricBills = [];
-  total;
   panelsQuantity = 0;
   systemTotalPrice = 0.0;
   powerTotal = 0.0;
@@ -19,6 +20,40 @@ export class PanelSystem {
     } else {
       this.electricBills.push(electricBill);
     }
+    // this.electricBills.push(electricBill);
+  }
+
+  deleteElectricBill(id) {
+    console.log({ deleteId: id });
+    // this.electricBills = this.electricBills
+    //   .filter((bill) => bill.id !== id)
+    //   .map((bill, idx) => new ElectricBill(idx + 1, bill.cost));
+    const billIndex = this.electricBills.findIndex((bill) => bill.id === id);
+    if (billIndex === -1) {
+      return false;
+    }
+
+    // this.electricBills = this.electricBills
+    //   .splice(billIndex, 1)
+    //   .map((bill, idx) => new ElectricBill(idx + 1, bill.cost));
+    console.log({
+      arr1: [...this.electricBills.slice(0, billIndex)],
+    });
+    this.electricBills = [
+      ...this.electricBills.slice(0, billIndex),
+      ...this.electricBills
+        .slice(billIndex + 1)
+        .map((bill) => new ElectricBill(bill.id - 1, bill.cost)),
+    ];
+    return true;
+    // this.electricBills = this.electricBills.reduce((billsArray, bill, idx) => {
+    //   if (bill.id !== id) return new ElectricBill(idx, bill.cost);
+    // }, []);
+    console.log({ elect: [...this.electricBills] });
+  }
+
+  getElectricBill(id) {
+    return this.electricBills.find((bill) => bill.id === id);
   }
 
   getTotalSystemCalculation(constants) {
@@ -50,7 +85,6 @@ export class PanelSystem {
     return ({ panelsQuantity, systemTotalPrice, powerTotal } = this);
   }
 
- 
   getFinalPrice(paymentOptionId, months, interestRate) {
     switch (paymentOptionId) {
       case 1:

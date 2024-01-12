@@ -50,11 +50,36 @@
       </div>
     </header>
 
+    <template id="billInputContainerTemplate">
+      <div class="d-flex flex-column w-100">
+        <div class="d-flex w-100">
+          <div class="_input-group">
+            <label
+              class="_input-group__label receipt-input-groups"
+              id="costLabel"
+              >Costo de recibo 1</label
+            >
+            <input type="number" class="form-control" id="costInput" />
+          </div>
+          <button type="button" class="btn btn-primary" id="btnBillDelete">
+            Eliminar
+          </button>
+        </div>
+        <p
+          class="text-secondary align-self-end text-danger visually-hidden"
+          id="invalidInputAlert"
+        >
+          Inválido
+        </p>
+      </div>
+    </template>
+
     <div class="body-container">
       <main class="main main--contact container">
         <h2 class="main__title main--contact__title">Cotizador</h2>
         <form class="main--contact-form">
-          <div class="d-flex flex-column w-100" id="inputGroupContainer">
+          <div id="billInputsList" class="main--contact-form__input-list"></div>
+          <!-- <div class="d-flex flex-column w-100" id="inputGroupContainer">
             <div class="_input-group">
               <label
                 class="_input-group__label receipt-input-groups"
@@ -69,7 +94,7 @@
             >
               Inválido
             </p>
-          </div>
+          </div> -->
           <button
             type="button"
             id="addReceipt"
@@ -78,7 +103,7 @@
             Añadir recibo
           </button>
 
-          <div class="_input-group" id="paymentFormSelect">
+          <div class="_input-group" id="paymentOptionSelectContainer">
             <label for="paymentOptionSelect" class="_input-group__label"
               >Forma de pago</label
             >
@@ -96,7 +121,7 @@
             </select>
           </div>
 
-          <div class="_input-group" id="paymentFormSelect">
+          <div class="_input-group" id="monthsSelectContainer">
             <label for="monthsSelect" class="_input-group__label"
               >Mensualidades</label
             >

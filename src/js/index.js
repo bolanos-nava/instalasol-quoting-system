@@ -1,5 +1,7 @@
 "use strict";
 
+import { ElectricBill } from "./modules/ElectricBill.js";
+import { PanelSystem } from "./modules/PanelSystem.js";
 import { getConstants } from "./modules/fetchers.js";
 
 /**
@@ -134,63 +136,138 @@ const months = {
   ],
 };
 
-async function main() {
-  const inputGroupContainers = [document.getElementById("inputGroupContainer")];
-  const buttonAddReceipt = document.getElementById("addReceipt");
+const billInputContainerTemplate = document.getElementById(
+  "billInputContainerTemplate"
+);
+const billInputsList = document.getElementById("billInputsList");
+const inputGroupContainers = [document.getElementById("inputGroupContainer")];
+const buttonAddReceipt = document.getElementById("addReceipt");
+const paymentOptionSelect = document.getElementById("paymentOptionSelect");
+const monthsSelect = document.getElementById("monthsSelect");
+const monthsSelectContainer = document.getElementById("monthsSelectContainer");
+const buttonCalculateTotalCost = document.getElementById(
+  "buttonCalculateTotalCost"
+);
+const buttonCalculateMonthlyPayments = document.getElementById(
+  "buttonCalculateMonthlyPayments"
+);
 
-  function validateInputGroup(inputElement, invalidInputAlertElement) {
-    const billCost = inputElement.value;
-    if (billCost < 0) {
-      inputElement.classList.add("input--invalid");
-      invalidInputAlertElement.classList.remove("visually-hidden");
-    } else {
-      inputElement.classList.remove("input--invalid");
-      invalidInputAlertElement.classList.add("visually-hidden");
-    }
-  }
-  inputGroupContainers[0].addEventListener("change", () => {
-    const inputGroupElement = inputGroupContainers[0].children[0];
-    const inputElement = inputGroupElement.children[1];
-    const invalidInputAlertElement = inputGroupContainers[0].children[1];
-    validateInputGroup(inputElement, invalidInputAlertElement);
-  });
-
-  function cloneInputGroupAndAppend() {
-    if (inputGroupContainers.length === 6) {
-      buttonAddReceipt.removeEventListener("click", cloneInputGroupAndAppend);
-      buttonAddReceipt.remove();
-    }
-
-    const newInputGroupContainer = inputGroupContainers[0].cloneNode(true);
-    inputGroupContainers.push(newInputGroupContainer);
-    newInputGroupContainer.removeAttribute("id");
-
-    const inputGroupElement = newInputGroupContainer.children[0];
-    const invalidInputAlertElement = newInputGroupContainer.children[1];
-    invalidInputAlertElement.classList.add("visually-hidden");
-
-    const labelElement = inputGroupElement.children[0];
-    labelElement.setAttribute("for", `receipt${inputGroupContainers.length}`);
-    labelElement.innerText = `Costo del recibo ${inputGroupContainers.length}`;
-
-    const inputElement = inputGroupElement.children[1];
-    inputElement.value = "";
+function validateInputGroup(inputElement, invalidInputAlertElement) {
+  const inputValue = inputElement.value;
+  if (inputValue < 0) {
+    inputElement.classList.add("input--invalid");
+    invalidInputAlertElement.classList.remove("visually-hidden");
+  } else {
     inputElement.classList.remove("input--invalid");
-    inputElement.setAttribute("id", `receipt${inputGroupContainers.length}`);
-
-    inputGroupContainers.slice(-2)[0].after(newInputGroupContainer);
-    newInputGroupContainer.addEventListener("change", () => {
-      validateInputGroup(inputElement, invalidInputAlertElement);
-    });
+    invalidInputAlertElement.classList.add("visually-hidden");
   }
-  buttonAddReceipt.addEventListener("click", cloneInputGroupAndAppend);
+}
 
-  const paymentOptionSelect = document.getElementById("paymentOptionSelect");
-  const monthsSelect = document.getElementById("monthsSelect");
+let appendedBills = 0;
+function deleteInputGroupTemplateClone(id) {
+  if (!appendedBills) return;
 
-  let paymentOptionSelectedId;
+  appendedBills--;
+  document.getElementById(id).remove();
+}
+
+function cloneInputGroupTemplate(panelSystem) {
+  if (appendedBills === 6) return;
+  const currentBill = ++appendedBills;
+
+  const billInputContainer = billInputContainerTemplate.content.cloneNode(true);
+
+  const elements = {
+    costLabel: null,
+    costInput: null,
+    btnBillDelete: null,
+    invalidInputAlert: null,
+  };
+  for (const id in elements) {
+    const element = billInputContainer.getElementById(id);
+    element.removeAttribute("id");
+    elements[id] = element;
+  }
+
+  elements.costLabel.setAttribute("for", `receipt${currentBill}`);
+  elements.costLabel.innerText = `Costo del recibo ${currentBill}`;
+
+  elements.costInput.setAttribute("id", `receipt${currentBill}`);
+  elements.costInput.value =
+    panelSystem.getElectricBill(currentBill)?.cost || "";
+
+  elements.costInput.onchange = () => {
+    validateInputGroup(elements.costInput, elements.invalidInputAlert);
+    // panelSystem.addElectricBill(0.0);
+    panelSystem.addElectricBill(
+      new ElectricBill(currentBill, elements.costInput.value)
+    );
+  };
+  elements.btnBillDelete.onclick = () => {
+    if (appendedBills > 1) {
+      console.log({ appendedBills, currentBill });
+      panelSystem.deleteElectricBill(currentBill);
+      console.log({ bills: [...panelSystem.electricBills] });
+      appendedBills--;
+      renderBillInputsList(panelSystem, { reset: false });
+    }
+  };
+
+  billInputsList.appendChild(billInputContainer);
+
+  if (currentBill === 6) {
+    buttonAddReceipt.classList.add("visually-hidden");
+  }
+}
+
+function renderBillInputsList(panelSystem, { reset = true } = {}) {
+  billInputsList.innerHTML = "";
+  const { electricBills } = panelSystem;
+  console.log({ ...panelSystem });
+  const electricBillsQuantity = reset ? electricBills.length : appendedBills;
+  appendedBills = 0;
+  console.log(electricBillsQuantity);
+
+  if (!electricBillsQuantity) cloneInputGroupTemplate(panelSystem);
+  else {
+    for (let i = 0; i < electricBillsQuantity; i++) {
+      console.log(i);
+      cloneInputGroupTemplate(panelSystem);
+    }
+  }
+}
+
+async function main() {
+  let billsArray = [
+    {
+      id: 1,
+      cost: 5000,
+    },
+    {
+      id: 2,
+      cost: 2000,
+    },
+  ];
+  // localStorage.setItem("bills", JSON.stringify(billsArray));
+  const lsBills =
+    JSON.parse(localStorage.getItem("bills"))?.map(
+      (bill) => new ElectricBill(bill.id, bill.cost)
+    ) || [];
+  // const lsBills = localStorage.getItem("bills") || [];
+  const panelSystem = new PanelSystem(lsBills);
+  console.log({ ...panelSystem });
+  const render = () => renderBillInputsList(panelSystem);
+
+  render();
+
+  buttonAddReceipt.addEventListener("click", () =>
+    cloneInputGroupTemplate(panelSystem)
+  );
+
+  return;
+
   paymentOptionSelect.addEventListener("change", () => {
-    paymentOptionSelectedId = paymentOptionSelect.value;
+    const paymentOptionSelectedId = paymentOptionSelect.value;
 
     const baseOption = monthsSelect.children[0];
 
@@ -200,7 +277,17 @@ async function main() {
     ) {
       monthsSelect.removeChild(monthsSelect.lastChild);
     }
-    if (paymentOptionSelectedId == 1) return null;
+
+    if (paymentOptionSelectedId == 1) {
+      [monthsSelectContainer, buttonCalculateMonthlyPayments].forEach((el) =>
+        el.classList.add("visually-hidden")
+      );
+      return null;
+    } else {
+      [monthsSelectContainer, buttonCalculateMonthlyPayments].forEach((el) =>
+        el.classList.remove("visually-hidden")
+      );
+    }
 
     const newOptions =
       months[getPaymentOptionName(Number(paymentOptionSelectedId))];
@@ -217,13 +304,6 @@ async function main() {
   monthsSelect.addEventListener("change", () => {
     monthsSelected = monthsSelect.value;
   });
-
-  const buttonCalculateTotalCost = document.getElementById(
-    "buttonCalculateTotalCost"
-  );
-  const buttonCalculateMonthlyPayments = document.getElementById(
-    "buttonCalculateMonthlyPayments"
-  );
 
   buttonCalculateTotalCost.addEventListener("click", () => {
     const billsCostSum = inputGroupContainers.reduce(
