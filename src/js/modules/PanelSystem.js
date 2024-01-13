@@ -31,6 +31,11 @@ export class PanelSystem {
     return this.electricBills.find((bill) => bill.id === id);
   }
 
+  clearElectricBills() {
+    this.electricBills = [];
+    this.updateLocalStorage({ clear: true });
+  }
+
   getTotalSystemCalculation(constants) {
     const {
       COST_PER_KW,
@@ -78,8 +83,8 @@ export class PanelSystem {
     return this.finalPrice;
   }
 
-  updateLocalStorage() {
-    if (!this.electricBills.every((bill) => bill.cost === "")) {
+  updateLocalStorage({ clear = false } = {}) {
+    if (!this.electricBills.every((bill) => bill.cost === "") || clear) {
       localStorage.setItem("electricBills", JSON.stringify(this.electricBills));
     }
   }

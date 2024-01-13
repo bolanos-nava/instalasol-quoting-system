@@ -21,8 +21,12 @@ const monthsSelectContainer = document.getElementById("monthsSelectContainer");
 const buttonCalculateTotalCost = document.getElementById(
   "buttonCalculateTotalCost"
 );
+const buttonClean = document.getElementById("buttonClean");
 const totalCost = document.getElementById("totalCost");
 const monthlyCost = document.getElementById("monthlyCost");
+const emailInput = document.getElementById("emailInput");
+const invalidEmailAlert = document.getElementById("invalidEmailAlert");
+const buttonSendQuotation = document.getElementById("buttonSendQuotation");
 
 function validateInputGroup(inputElement, invalidInputAlertElement) {
   const inputValue = inputElement.value;
@@ -114,12 +118,16 @@ async function main() {
   const panelSystem = new PanelSystem(lsBills);
   renderBillInputsList(panelSystem);
 
-  buttonAddReceipt.addEventListener("click", () =>
-    cloneInputGroupTemplate(panelSystem)
-  );
-
-  paymentOptionSelect.addEventListener("change", () => {
+  buttonAddReceipt.onclick = () => cloneInputGroupTemplate(panelSystem);
+  paymentOptionSelect.onchange = () => {
+    buttonSendQuotation.setAttribute("disabled", true);
+    totalCost.innerText = "";
+    monthlyCost.innerText = "";
     const paymentOptionSelectedId = Number(paymentOptionSelect.value);
+    if (isNaN(paymentOptionSelectedId) || paymentOptionSelectedId >= 2)
+      buttonCalculateTotalCost.setAttribute("disabled", true);
+    else if (paymentOptionSelectedId === 1)
+      buttonCalculateTotalCost.removeAttribute("disabled");
 
     // we clean the options of monthsSelect
     while (monthsSelect.children.length > 1)
@@ -129,45 +137,126 @@ async function main() {
       ? monthsSelectContainer.classList.add("visually-hidden")
       : monthsSelectContainer.classList.remove("visually-hidden");
 
-    const newOptions = constants.paymentOptions
-      .find((option) => option.id === paymentOptionSelectedId)
-      .interestRates.map(({ months }) => ({
-        value: months,
-        label: `${months} mensualidades`,
-      }));
-    newOptions.forEach(({ months }) => {
+    // finding the interest rates of the selected payment option
+    const interestRatesForSelectedOption = constants.paymentOptions.find(
+      (option) => option.id === paymentOptionSelectedId
+    )?.interestRates;
+
+    // if there are no interest rates for that option, then just return
+    if (!interestRatesForSelectedOption) return;
+
+    interestRatesForSelectedOption.forEach(({ months }) => {
       const newOption = monthsSelect.children[0].cloneNode();
       newOption.removeAttribute("selected");
       newOption.setAttribute("value", months);
       newOption.innerText = `${months} mensualidades`;
       monthsSelect.appendChild(newOption);
     });
-  });
+  };
+  monthsSelect.onchange = (e) => {
+    const monthsSelectedId = Number(e.target.value);
 
-  buttonCalculateTotalCost.addEventListener("click", () => {
+    if (isNaN(monthsSelectedId))
+      buttonCalculateTotalCost.setAttribute("disabled", true);
+    else buttonCalculateTotalCost.removeAttribute("disabled");
+  };
+
+  buttonCalculateTotalCost.onclick = () => {
     const { panelsQuantity, systemTotalPrice, powerTotal } =
       panelSystem.getTotalSystemCalculation(constants.panelSystemConstants);
 
-    totalCost.innerText = `Costo total: $${systemTotalPrice}. Energía producida: ${powerTotal} kW`;
+    totalCost.innerText = `Costo total: $${systemTotalPrice}. Energía producida: ${powerTotal} kW. Módulos del sistema: ${panelsQuantity}`;
 
     const paymentOptionSelectedId = Number(paymentOptionSelect.value);
 
-    if (paymentOptionSelectedId === 1) {
-      monthlyCost.innerText = `Costo final con el 10% de descuento: $${
-        0.9 * systemTotalPrice
-      } MXN`;
-    } else {
-      const monthsSelected = Number(monthsSelect.value);
-      const interestRate = constants.paymentOptions
-        .find(({ id }) => id === paymentOptionSelectedId)
-        .interestRates.find(({ months }) => months === monthsSelected).rate;
-      const finalPrice = panelSystem.getFinalPrice(
-        paymentOptionSelectedId,
-        monthsSelected,
-        interestRate
-      );
-      monthlyCost.innerText = `Pagos mensuales: ${monthsSelected} pagos mensuales de $${finalPrice} MXN cada uno`;
+    if (isNaN(paymentOptionSelectedId) || paymentOptionSelectedId >= 2)
+      buttonSendQuotation.setAttribute("disabled", true);
+
+    switch (paymentOptionSelectedId) {
+      case 1: {
+        monthlyCost.innerText = `Costo final con el 10% de descuento: $${
+          0.9 * systemTotalPrice
+        } MXN`;
+        buttonSendQuotation.removeAttribute("disabled");
+        return;
+      }
+      case 2:
+      case 3: {
+        const monthsSelected = Number(monthsSelect.value);
+        const interestRate = constants.paymentOptions
+          .find(({ id }) => id === paymentOptionSelectedId)
+          .interestRates.find(({ months }) => months === monthsSelected).rate;
+        const finalPrice = panelSystem.getFinalPrice(
+          paymentOptionSelectedId,
+          monthsSelected,
+          interestRate
+        );
+        monthlyCost.innerText = `Pagos mensuales: ${monthsSelected} pagos mensuales de $${finalPrice} MXN cada uno`;
+        buttonSendQuotation.removeAttribute("disabled");
+        return;
+      }
+      default: {
+        monthlyCost.innerText = "";
+        return;
+      }
     }
+  };
+
+  buttonClean.onclick = () => {
+    monthlyCost.innerText = "";
+    totalCost.innerText = "";
+    panelSystem.clearElectricBills();
+    monthsSelectContainer.classList.remove("visually-hidden");
+    renderBillInputsList(panelSystem);
+  };
+
+  emailInput.onblur = (event) => {
+    const value = event.target.value;
+    const isValidEmail = value.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/);
+    if (value === "" || !isValidEmail) {
+      event.target.classList.add("input--invalid");
+      invalidEmailAlert.classList.remove("visually-hidden");
+      buttonSendQuotation.setAttribute("disabled", true);
+    } else {
+      event.target.classList.remove("input--invalid");
+      invalidEmailAlert.classList.add("visually-hidden");
+      buttonSendQuotation.removeAttribute("disabled");
+    }
+  };
+
+  buttonSendQuotation.addEventListener("click", (e) => {
+    e.preventDefault();
+
+    const EMAILJS = {
+      SERVICE_ID: "default_service",
+      TEMPLATE_ID: "template_428j37r",
+    };
+    emailjs
+      .send("default_service", "quotation_template", {
+        to_name: emailInput.value,
+        to_email: emailInput.value,
+        power_total: panelSystem.powerTotal,
+        panels_quantity: panelSystem.panelsQuantity,
+        system_total_price: panelSystem.systemTotalPrice,
+        final_price: panelSystem.finalPrice,
+      })
+      .then(
+        () => {
+          emailInput.value = "";
+          Swal.fire({
+            title: "¡Correo enviado con éxito!",
+            text: "Tu cotización pronto te llegará por correo",
+            icon: "success",
+          });
+        },
+        () => {
+          Swal.fire({
+            title: "Correo no enviado",
+            text: "Inténtelo de nuevo más tarde",
+            icon: "error",
+          });
+        }
+      );
   });
 
   return;
