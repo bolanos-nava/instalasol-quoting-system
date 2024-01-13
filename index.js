@@ -154,6 +154,7 @@ async function main() {
     });
   };
   monthsSelect.onchange = (e) => {
+    buttonSendQuotation.setAttribute("disabled", true);
     const monthsSelectedId = Number(e.target.value);
 
     if (isNaN(monthsSelectedId))
