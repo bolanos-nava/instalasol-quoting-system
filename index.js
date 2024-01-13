@@ -1,8 +1,8 @@
 "use strict";
 
-import { ElectricBill } from "./modules/ElectricBill.js";
-import { PanelSystem } from "./modules/PanelSystem.js";
-import { getConstants } from "./modules/fetchers.js";
+import { ElectricBill } from "./src/js/modules/ElectricBill.js";
+import { PanelSystem } from "./src/js/modules/PanelSystem.js";
+import { getConstants } from "./src/js/modules/fetchers.js";
 
 /**
  * Solar panel quoting system
