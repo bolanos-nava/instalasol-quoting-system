@@ -74,8 +74,12 @@
       </div>
     </template>
 
+    <template>
+      <p id="" class="text-center w-100"></p>
+    </template>
+
     <div class="body-container">
-      <main class="main main--contact container">
+      <main class="main main--contact container" id="mainContainer">
         <h2 class="main__title main--contact__title">Cotizador</h2>
         <form class="main--contact-form">
           <div id="billInputsList" class="main--contact-form__input-list"></div>
@@ -144,15 +148,11 @@
               role="button"
               id="buttonCalculateTotalCost"
             />
-            <input
-              class="main--contact-form__button btn button button--rounded"
-              type="button"
-              value="Calcular pagos mensuales"
-              role="button"
-              id="buttonCalculateMonthlyPayments"
-            />
           </div>
         </form>
+
+        <h3 id="totalCost" class="m-2 text-center w-100"></h3>
+        <h3 id="monthlyCost" class="m-2 text-center w-100"></h3>
       </main>
     </div>
 

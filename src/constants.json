@@ -10,7 +10,8 @@
     {
       "id": 1,
       "name": "Una exhibición",
-      "codename": "oneExhibition"
+      "codename": "oneExhibition",
+      "interestRates": []
     },
     {
       "id": 2,
@@ -43,6 +44,10 @@
         {
           "months": 36,
           "rate": 0.35
+        },
+        {
+          "months": 48,
+          "rate": 0.45
         }
       ]
     }
