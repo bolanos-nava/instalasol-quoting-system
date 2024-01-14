@@ -80,6 +80,7 @@ export class PanelSystem {
           (this.systemTotalPrice * (1.0 + interestRate)) / months;
         break;
     }
+    this.finalPrice = Math.round(this.finalPrice * 100) / 100;
     return this.finalPrice;
   }
 

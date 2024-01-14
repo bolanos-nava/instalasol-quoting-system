@@ -192,7 +192,7 @@ async function main() {
           monthsSelected,
           interestRate
         );
-        monthlyCost.innerText = `Pagos mensuales: ${monthsSelected} pagos mensuales de $${finalPrice} MXN cada uno`;
+        monthlyCost.innerText = `Pagos mensuales: ${monthsSelected} pagos de $${finalPrice} MXN cada uno`;
         buttonSendQuotation.removeAttribute("disabled");
         return;
       }
@@ -239,7 +239,15 @@ async function main() {
         power_total: panelSystem.powerTotal,
         panels_quantity: panelSystem.panelsQuantity,
         system_total_price: panelSystem.systemTotalPrice,
-        final_price: panelSystem.finalPrice,
+        final_price: (() => {
+          switch (Number(paymentOptionSelect.value)) {
+            case 1:
+              return `Costo final: $${panelSystem.finalPrice} después del 10% de descuento.`;
+            case 2:
+            case 3:
+              return `Pagos mensuales: ${monthsSelect.value} pagos de $${panelSystem.finalPrice}`;
+          }
+        })(),
       })
       .then(
         () => {
