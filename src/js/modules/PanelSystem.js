@@ -85,8 +85,6 @@ export class PanelSystem {
   }
 
   updateLocalStorage({ clear = false } = {}) {
-    if (!this.electricBills.every((bill) => bill.cost === "") || clear) {
-      localStorage.setItem("electricBills", JSON.stringify(this.electricBills));
-    }
+    localStorage.setItem("electricBills", JSON.stringify(this.electricBills));
   }
 }

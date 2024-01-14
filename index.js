@@ -111,10 +111,10 @@ async function main() {
   let constants = await getConstants();
   constants = await constants.json();
 
-  const lsBills =
-    JSON.parse(localStorage.getItem("electricBills"))?.map(
-      (bill) => new ElectricBill(bill.id, bill._cost)
-    ) || [];
+  let lsBills =
+    JSON.parse(localStorage.getItem("electricBills"))
+      ?.filter((bill) => bill._cost !== "")
+      ?.map((bill) => new ElectricBill(bill.id, bill._cost)) || [];
   const panelSystem = new PanelSystem(lsBills);
   renderBillInputsList(panelSystem);
 
